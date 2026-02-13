@@ -1,11 +1,11 @@
 from __future__ import annotations
-
 from typing import Tuple
 from game_map import GameMap
 import tiles_types
 import random
 from typing import Iterator, Tuple, List, TYPE_CHECKING
 import tcod
+import entity_factories
 
 
 if TYPE_CHECKING:
@@ -38,21 +38,33 @@ class RectangularRoom:
             and self.y1 <= other.y2
             and self.y2 >= other.y1
         )
-
-def tunnel_between(
-        start: Tuple[int, int], end: Tuple[int, int]
-    ) -> Iterator[Tuple[int, int]]:
-    """Return an L-Shaped tunnel between those two points."""
+    
+def tunnel_between(start: Tuple[int, int], end: Tuple[int, int]) -> Iterator[Tuple[int, int]]:
+    """Return an L-shaped tunnel between two points."""
     x1, y1 = start
     x2, y2 = end
     if random.random() < 0.5:
         corner_x, corner_y = x2, y1
     else:
         corner_x, corner_y = x1, y2
+
     for x, y in tcod.los.bresenham((x1, y1), (corner_x, corner_y)).tolist():
         yield x, y
     for x, y in tcod.los.bresenham((corner_x, corner_y), (x2, y2)).tolist():
         yield x, y
+
+
+def place_entities(room: RectangularRoom, dungeon: GameMap, maximum_monsters: int) -> None:
+    number_of_monsters = random.randint(0, maximum_monsters)
+    for _ in range(number_of_monsters):
+        x = random.randint(room.x1 + 1, room.x2 - 1)
+        y = random.randint(room.y1 + 1, room.y2 - 1)
+        if not any(entity.x == x and entity.y == y for entity in dungeon.entities):
+            if random.random() < 0.8:
+                    entity_factories.orc.spawn(dungeon, x, y)
+        else:
+                    entity_factories.troll.spawn(dungeon, x, y)
+
 
 def generate_dungeon(
         max_rooms: int,
@@ -61,9 +73,10 @@ def generate_dungeon(
         map_width: int,
         map_height: int,
         player: Entity,
+        max_monsters_per_room: int,
      )  -> GameMap:
         """Generate a new map."""
-        dungeon = GameMap(map_width, map_height)
+        dungeon = GameMap(map_width, map_height, entities=[player])
 
         rooms: List[RectangularRoom] = []
 
@@ -85,6 +98,8 @@ def generate_dungeon(
             else:
                 for x, y in tunnel_between(rooms[-1].center, new_room.center):
                     dungeon.tiles[x,y] = tiles_types.floor
+                
+            place_entities(new_room, dungeon, max_monsters_per_room)
                 
             rooms.append(new_room)
             
