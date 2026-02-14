@@ -1,13 +1,21 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import Optional, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
  from engine import Engine
  from entity import Entity
 
 class Action:
-      def perform(self, engine: Engine, entity: Entity) -> None:
+   def __init__(self, entity: Entity) -> None:
+        super().__init__()
+        self.entity = entity
+
+   @property
+   def engine(self) -> Engine:
+        """Return the engine this action belongs to."""
+        return self.entity.gamemap.engine
+   def perform(self, engine: Engine, entity: Entity) -> None:
        """Perform this action with the objects needed to determine its scope.
 
        `engine` is the scope this action is being performed in.
