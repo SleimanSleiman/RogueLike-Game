@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Optional, Tuple, Type, TypeVar, TYPE_CHECKING
 import copy
-
+from render_order import RenderOrder
 if TYPE_CHECKING:
     from RogueLike.game_map import GameMap
     from components.ai import BaseAI
@@ -24,6 +24,7 @@ class Entity:
             color: Tuple[int, int, int] = (255, 255, 255),
             name: str = "<Unamned>",
             block_movement: bool = False,
+            render_order: RenderOrder = RenderOrder.CORPSE,
       ):
         self.x = x
         self.y = y
@@ -31,6 +32,8 @@ class Entity:
         self.color = color
         self.name = name
         self.block_movement = block_movement
+        self.render_order = render_order
+
         if gamemap:
             # If gamemap isn't provided now then it will be set later.
             self.gamemap = gamemap
@@ -81,6 +84,8 @@ class Actor(Entity):
                 color=color,
                 name=name,
                 block_movement=True,
+            render_order=RenderOrder.ACTOR,
+
             )
             
             self.ai: Optional[BaseAI] = ai_cls(self)
