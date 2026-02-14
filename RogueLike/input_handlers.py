@@ -27,6 +27,11 @@ WAIT_KEYS = {
 class EventHandler(tcod.event.EventDispatch[Action]):
     def __init__(self, engine: Engine):
         self.engine = engine
+def handle_events(self) -> None:
+        raise NotImplementedError()
+
+    def ev_quit(self, event: tcod.event.Quit) -> Optional[Action]:
+        raise SystemExit()
 
     def handle_events(self) -> None:
         for event in tcod.event.wait():

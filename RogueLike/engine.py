@@ -2,19 +2,22 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from tcod.context import Context
 from tcod.console import Console
-from RogueLike.input_handlers import EventHandler
+from input_handlers import MainGameEventHandler
+
 from tcod.map import compute_fov
 
 if TYPE_CHECKING:
-    from RogueLike.entity import Actor
-    from RogueLike.game_map import GameMap
+    from entity import Actor
+    from game_map import GameMap
+    from input_handlers import EventHandler
+
 
 
 class Engine:
     game_map: GameMap
 
     def __init__(self, player: Actor):
-        self.event_handler: EventHandler = EventHandler(self)
+        self.event_handler: EventHandler = MainGameEventHandler(self)
         self.player = player
         
     def handle_enemy_turns(self) -> None:
