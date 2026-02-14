@@ -1,15 +1,15 @@
 from __future__ import annotations
 from typing import Tuple
-from game_map import GameMap
-import tiles_types
+from RogueLike.game_map import GameMap
+from RogueLike import tiles_types
 import random
 from typing import Iterator, Tuple, List, TYPE_CHECKING
 import tcod
-import entity_factories
+from RogueLike import entity_factories
 
 
 if TYPE_CHECKING:
-    from entity import Entity
+    from RogueLike.engine import Engine
 
 class RectangularRoom:
     def __init__(self, x: int, y: int, width: int, height: int,):
@@ -72,11 +72,12 @@ def generate_dungeon(
         room_max_size: int,
         map_width: int,
         map_height: int,
-        player: Entity,
+        engine: Engine,
         max_monsters_per_room: int,
      )  -> GameMap:
         """Generate a new map."""
-        dungeon = GameMap(map_width, map_height, entities=[player])
+        player = engine.player
+        dungeon = GameMap(engine, map_width, map_height, entities=[player])
 
         rooms: List[RectangularRoom] = []
 
@@ -94,7 +95,7 @@ def generate_dungeon(
             dungeon.tiles[new_room.inner] = tiles_types.floor
             
             if len(rooms) == 0:
-                player.x, player.y = new_room.center
+                player.place(*new_room.center, dungeon)
             else:
                 for x, y in tunnel_between(rooms[-1].center, new_room.center):
                     dungeon.tiles[x,y] = tiles_types.floor
